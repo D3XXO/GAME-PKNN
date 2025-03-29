@@ -1247,6 +1247,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DoorLobby
       objectReference: {fileID: 0}
+    - target: {fileID: 8017190408071288836, guid: cc5aff8734f60194788c9f8d0361d71d, type: 3}
+      propertyPath: targetScene
+      value: Main 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
