@@ -9,6 +9,12 @@ TagManager:
   - WallOnlyPlayer
   - SpawnPoint
   - Wrong
+  - purple portal
+  - pink portal
+  - Orange portal
+  - Blue portal
+  - Brown portal
+  - Dark blue portal
   layers:
   - Default
   - TransparentFX
