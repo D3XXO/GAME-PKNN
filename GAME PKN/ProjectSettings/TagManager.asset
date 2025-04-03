@@ -17,6 +17,9 @@ TagManager:
   - Dark blue portal
   - Coin
   - door
+  - ScoreText
+  - Key
+  - Home
   layers:
   - Default
   - TransparentFX

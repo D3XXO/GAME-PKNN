@@ -12,7 +12,8 @@ public class SceneChanger : MonoBehaviour
         
         if (other.CompareTag("Player")) // Pastikan player memiliki tag "Player"
         {
-            SceneManager.LoadScene(targetScene);
+            ScoreManager.instance.SaveScoreForCurrentScene(); // Simpan skor sebelum pindah
+            SceneManager.LoadScene(targetScene); // Pindah ke scene berikutnya
         }
     }
 }

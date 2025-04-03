@@ -7,8 +7,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveDirection;
     private Rigidbody2D rb;
 
-    public CoinManager cm;
-
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -58,11 +56,4 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if(other.gameObject.CompareTag("Coin")) {
-            Destroy(other.gameObject);
-            cm.coinCount++;
-        }
-    }
 }
