@@ -4,16 +4,18 @@ using UnityEngine.SceneManagement;
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed;
-    private Vector2 moveDirection;
+    private Vector2 moveDirection = Vector2.zero;
     private Rigidbody2D rb;
+    private Animator animator;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        animator = GetComponent<Animator>();
 
-        // Cek apakah ada spawn point yang tersimpan
+        // Check if there's a saved spawn point
         string spawnPointName = PlayerPrefs.GetString("SpawnPoint", "");
         if (!string.IsNullOrEmpty(spawnPointName))
         {
@@ -27,16 +29,28 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        // Get input
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
-
         moveDirection = new Vector2(moveX, moveY).normalized;
 
+        // Handle animation states
         if (moveDirection != Vector2.zero)
         {
-            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
-            Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+            animator.SetBool("isWalking", true);
+
+            // Update current movement animation
+            animator.SetFloat("InputX", moveDirection.x);
+            animator.SetFloat("InputY", moveDirection.y);
+
+            // Store last direction for idle state
+            animator.SetFloat("LastInputX", moveDirection.x);
+            animator.SetFloat("LastInputY", moveDirection.y);
+        }
+        else
+        {
+            // No movement, set to idle animation
+            animator.SetBool("isWalking", false);
         }
     }
 
