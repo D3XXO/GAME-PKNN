@@ -7,8 +7,7 @@ public class Obstacle : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            ScoreManager.instance.SaveScoreForCurrentScene(); // Simpan poin dulu
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Kembali ke scene sebelumnya
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 }

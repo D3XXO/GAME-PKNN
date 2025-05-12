@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Portal : MonoBehaviour
 {
-    private Transform destination; // tujuan
+    private Transform destination;
     public bool isOrange;
     public float distance = 0.2f;
-    // Start is called before the first frame update
+
     void Start()
     {
         if (isOrange == false)

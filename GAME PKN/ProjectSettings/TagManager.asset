@@ -31,8 +31,8 @@ TagManager:
   - Player
   - Enemy
   - Obstacle
-  - 
-  - 
+  - LightMask
+  - VisibleObject
   - 
   - 
   - 
@@ -56,4 +56,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: LightMask
+    uniqueID: 765338847
+    locked: 0
+  - name: VisibleObject
+    uniqueID: 2826893727
     locked: 0

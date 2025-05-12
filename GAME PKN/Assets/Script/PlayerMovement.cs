@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,6 +8,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveDirection = Vector2.zero;
     private Rigidbody2D rb;
     private Animator animator;
+
+    public GameObject gameOverCanvas;
+    public float delayBeforeShow = 1f;
 
     private void Start()
     {
@@ -60,14 +64,40 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
-{
-    if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Wrong"))
     {
-        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        if (currentSceneIndex > 0)
+        if (collision.gameObject.CompareTag("Wrong"))
         {
-            SceneManager.LoadScene(currentSceneIndex - 1);
+            int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+            if (currentSceneIndex > 0)
+            {
+                SceneManager.LoadScene(currentSceneIndex - 1);
+            }
+        }
+
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            StartCoroutine(GameOver());
         }
     }
-}
+
+    IEnumerator GameOver()
+    {
+        GetComponent<PlayerMovement>().enabled = false;
+        Time.timeScale = 0.5f;
+        yield return new WaitForSecondsRealtime(delayBeforeShow);
+        gameOverCanvas.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void MainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Start");
+    }
 }

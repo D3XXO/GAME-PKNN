@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Start & Finish/Start.unity
     guid: 09e98f5566a21924ba0aa2465c2b0d1f
   - enabled: 1
+    path: Assets/Scenes/Start & Finish/StoryBegin.unity
+    guid: 2b55a3142f017f448807cc7748e0a93c
+  - enabled: 1
     path: Assets/Scenes/Stage 1/Lobby 1.unity
     guid: 097a5b6863cbe5b47af6b2eb0cec0f9a
   - enabled: 1

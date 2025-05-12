@@ -4,117 +4,159 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
-    Rigidbody2D rb;
-    private Animator animator;
+    [Header("Movement Settings")]
     [SerializeField] float speed;
-    Vector2[] directions = { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
-    int directionIndex = 0;
-    [SerializeField] Vector2 currentDir;
+    [SerializeField] float chaseSpeedMultiplier = 1.5f;
     [SerializeField] float rayDistance;
     [SerializeField] LayerMask rayLayer;
 
-    // Animation parameters
-    private bool isMoving = false;
-    private static readonly int IsWalking = Animator.StringToHash("isWalking");
+    [Header("Path Settings")]
+    [SerializeField] Transform[] pathPoints;
+    [SerializeField] float waypointThreshold = 0.1f;
+
+    private Rigidbody2D rb;
+    private Animator animator;
+    private Vector2 currentDir;
+    private int currentWaypoint = 0;
+    private bool isChasing = false;
+    private Transform player;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        currentDir = directions[directionIndex];
-        UpdateAnimation();
+        if (pathPoints.Length > 0)
+        {
+            currentDir = (pathPoints[currentWaypoint].position - transform.position).normalized;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Raycast
-        RaycastHit2D hit2D = Physics2D.Raycast(transform.position, currentDir, rayDistance, rayLayer);
-        Vector3 endPoint = currentDir * rayDistance;
-        Debug.DrawLine(transform.position, transform.position + endPoint, Color.green);
-
-        if (hit2D.collider != null)
+        // Check for player in detection range
+        if (!isChasing && Vector2.Distance(transform.position, player.position) < rayDistance)
         {
-            ChangeDirection();
+            StartChasing();
+        }
+        else if (isChasing && Vector2.Distance(transform.position, player.position) > rayDistance * 1.5f)
+        {
+            StopChasing();
         }
 
-        // Set animation direction based on movement direction
-        SetAnimationDirection();
-    }
+        // Update movement direction
+        if (!isChasing && pathPoints.Length > 0)
+        {
+            PathMovement();
+        }
 
-    void SetAnimationDirection()
-    {
-        // Update animation parameters based on direction
-        if (currentDir == Vector2.up)
+        // Update animations if animator exists
+        if (animator != null)
         {
-            animator.SetInteger("Direction", 0); // Up
-        }
-        else if (currentDir == Vector2.right)
-        {
-            animator.SetInteger("Direction", 1); // Right
-        }
-        else if (currentDir == Vector2.down)
-        {
-            animator.SetInteger("Direction", 2); // Down
-        }
-        else if (currentDir == Vector2.left)
-        {
-            animator.SetInteger("Direction", 3); // Left
+            UpdateAnimations();
         }
     }
 
-    public void ChangeDirection()
+    void PathMovement()
     {
-        directionIndex += Random.Range(0, 2) * 2 - 1;
-        int clampedIndex = directionIndex % directions.Length;
-        if (clampedIndex < 0)
+        // Check if reached current waypoint
+        if (Vector2.Distance(transform.position, pathPoints[currentWaypoint].position) < waypointThreshold)
         {
-            clampedIndex = directions.Length + clampedIndex;
+            currentWaypoint = (currentWaypoint + 1) % pathPoints.Length;
+            currentDir = (pathPoints[currentWaypoint].position - transform.position).normalized;
+        }
+        else
+        {
+            // Check for obstacles
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, currentDir, rayDistance, rayLayer);
+            Debug.DrawLine(transform.position, transform.position + (Vector3)currentDir * rayDistance, Color.green);
+
+            if (hit.collider != null && !hit.collider.CompareTag("Player"))
+            {
+                // Find next waypoint if path is blocked
+                currentWaypoint = (currentWaypoint + 1) % pathPoints.Length;
+                currentDir = (pathPoints[currentWaypoint].position - transform.position).normalized;
+            }
+        }
+    }
+
+    void StartChasing()
+    {
+        isChasing = true;
+        if (animator != null)
+        {
+            animator.SetBool("IsChasing", true);
+        }
+    }
+
+    void StopChasing()
+    {
+        isChasing = false;
+        if (animator != null)
+        {
+            animator.SetBool("IsChasing", false);
+        }
+        // Return to nearest path point
+        if (pathPoints.Length > 0)
+        {
+            currentWaypoint = FindNearestWaypoint();
+            currentDir = (pathPoints[currentWaypoint].position - transform.position).normalized;
+        }
+    }
+
+    int FindNearestWaypoint()
+    {
+        int nearest = 0;
+        float minDistance = float.MaxValue;
+        
+        for (int i = 0; i < pathPoints.Length; i++)
+        {
+            float distance = Vector2.Distance(transform.position, pathPoints[i].position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearest = i;
+            }
+        }
+        
+        return nearest;
+    }
+
+    void UpdateAnimations()
+    {
+        // Update animation parameters based on movement
+        animator.SetFloat("MoveX", currentDir.x);
+        animator.SetFloat("MoveY", currentDir.y);
+        animator.SetFloat("Speed", currentDir.magnitude);
+    }
+
+    void FixedUpdate()
+    {
+        Vector2 targetVelocity;
+
+        if (isChasing)
+        {
+            currentDir = (player.position - transform.position).normalized;
+            targetVelocity = currentDir * speed * chaseSpeedMultiplier * Time.deltaTime;
+        }
+        else
+        {
+            targetVelocity = currentDir * speed * Time.deltaTime;
         }
 
-        rb.velocity = Vector2.zero;
-        currentDir = directions[clampedIndex];
-
-        // Update animation after changing direction
-        UpdateAnimation();
+        rb.velocity = targetVelocity;
     }
 
     public void StopMovement()
     {
         rb.velocity = Vector2.zero;
-        isMoving = false;
-        UpdateAnimation();
-    }
-
-    void StartMovement()
-    {
-        isMoving = true;
-        UpdateAnimation();
-    }
-
-    void UpdateAnimation()
-    {
-        // Update the isWalking parameter in the animator
-        animator.SetBool(IsWalking, isMoving);
-    }
-
-    void FixedUpdate()
-    {
-        rb.velocity = currentDir.normalized * speed * Time.deltaTime;
-
-        // Check if we're moving or not based on velocity
-        bool wasMoving = isMoving;
-        isMoving = rb.velocity.sqrMagnitude > 0.01f;
-
-        // Only update the animator if the moving state changed
-        if (wasMoving != isMoving)
+        if (animator != null)
         {
-            UpdateAnimation();
+            animator.SetFloat("Speed", 0);
         }
     }
 }

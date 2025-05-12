@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4003807040385828131}
   - component: {fileID: 9106153346959147650}
-  - component: {fileID: 5733845997514468482}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -85,15 +84,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5733845997514468482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4238004027223069956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ffea0fe3e25b1c4ea3f8c43650d95e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
