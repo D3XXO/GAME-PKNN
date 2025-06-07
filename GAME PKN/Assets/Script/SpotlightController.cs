@@ -7,7 +7,7 @@ public class SpotlightController : MonoBehaviour
     public Material spotlightMaterial;
     
     [Header("Settings")]
-    public float spotRadius = 5f;
+    public float spotRadius;
     public float falloff = 2f;
     public float pulseSpeed = 1f;
     public float pulseAmount = 0.5f;

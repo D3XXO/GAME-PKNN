@@ -6,9 +6,10 @@ public class EnemyMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] float speed;
-    [SerializeField] float chaseSpeedMultiplier = 1.5f;
+    [SerializeField] float chaseSpeedMultiplier;
     [SerializeField] float rayDistance;
     [SerializeField] LayerMask rayLayer;
+    [SerializeField] LayerMask wallLayer;
 
     [Header("Path Settings")]
     [SerializeField] Transform[] pathPoints;
@@ -38,23 +39,29 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-        // Check for player in detection range
-        if (!isChasing && Vector2.Distance(transform.position, player.position) < rayDistance)
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        
+        if (!isChasing && distanceToPlayer < rayDistance)
         {
-            StartChasing();
+            if (HasLineOfSightToPlayer())
+            {
+                StartChasing();
+            }
         }
-        else if (isChasing && Vector2.Distance(transform.position, player.position) > rayDistance * 1.5f)
+        else if (isChasing && distanceToPlayer > rayDistance * 1.5f)
+        {
+            StopChasing();
+        }
+        else if (isChasing && !HasLineOfSightToPlayer())
         {
             StopChasing();
         }
 
-        // Update movement direction
         if (!isChasing && pathPoints.Length > 0)
         {
             PathMovement();
         }
 
-        // Update animations if animator exists
         if (animator != null)
         {
             UpdateAnimations();
@@ -63,7 +70,6 @@ public class EnemyMovement : MonoBehaviour
 
     void PathMovement()
     {
-        // Check if reached current waypoint
         if (Vector2.Distance(transform.position, pathPoints[currentWaypoint].position) < waypointThreshold)
         {
             currentWaypoint = (currentWaypoint + 1) % pathPoints.Length;
@@ -71,17 +77,25 @@ public class EnemyMovement : MonoBehaviour
         }
         else
         {
-            // Check for obstacles
             RaycastHit2D hit = Physics2D.Raycast(transform.position, currentDir, rayDistance, rayLayer);
             Debug.DrawLine(transform.position, transform.position + (Vector3)currentDir * rayDistance, Color.green);
 
             if (hit.collider != null && !hit.collider.CompareTag("Player"))
             {
-                // Find next waypoint if path is blocked
                 currentWaypoint = (currentWaypoint + 1) % pathPoints.Length;
                 currentDir = (pathPoints[currentWaypoint].position - transform.position).normalized;
             }
         }
+    }
+
+    bool HasLineOfSightToPlayer()
+    {
+        Vector2 directionToPlayer = (player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, directionToPlayer, rayDistance, wallLayer);
+        
+        Debug.DrawRay(transform.position, directionToPlayer * rayDistance, Color.red);
+        
+        return hit.collider == null || hit.collider.CompareTag("Player");
     }
 
     void StartChasing()

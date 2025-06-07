@@ -12,6 +12,11 @@ public class PlayerMovement : MonoBehaviour
     public GameObject gameOverCanvas;
     public float delayBeforeShow = 1f;
 
+    [Header("Audio")]
+    public AudioClip enemyHitSound;
+    private AudioSource audioSource;
+
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -19,7 +24,6 @@ public class PlayerMovement : MonoBehaviour
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         animator = GetComponent<Animator>();
 
-        // Check if there's a saved spawn point
         string spawnPointName = PlayerPrefs.GetString("SpawnPoint", "");
         if (!string.IsNullOrEmpty(spawnPointName))
         {
@@ -29,6 +33,8 @@ public class PlayerMovement : MonoBehaviour
                 transform.position = spawnPoint.transform.position;
             }
         }
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -76,6 +82,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Enemy"))
         {
+            if (enemyHitSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(enemyHitSound);
+            }
+            
             StartCoroutine(GameOver());
         }
     }
@@ -83,16 +94,24 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator GameOver()
     {
         GetComponent<PlayerMovement>().enabled = false;
-        Time.timeScale = 0.5f;
+        Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(delayBeforeShow);
         gameOverCanvas.SetActive(true);
-        Time.timeScale = 0f;
     }
 
     public void RestartGame()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        int previousSceneIndex = SceneManager.GetActiveScene().buildIndex - 1;
+
+        if (previousSceneIndex >= 0)
+        {
+            SceneManager.LoadScene(previousSceneIndex);
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 
     public void MainMenu()
